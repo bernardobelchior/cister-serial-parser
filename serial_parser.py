@@ -1,9 +1,10 @@
 import serial
+import asyncio
 import requests
 import json
 from configparser import SafeConfigParser
 
-serial_path = '/dev/ttyUSB0'
+serial_path = '/dev/ttyUSB3'
 serial_baudrate = 115200
 
 
@@ -14,25 +15,26 @@ def read_config():
 
 
 def read(host):
-    serial_port = serial.Serial(serial_path, serial_baudrate)
+    ser = serial.Serial(serial_path, serial_baudrate)
 
     while True:
-        line = serial_port.readline().decode('ascii')
+        line = ser.readline().decode('ascii')
         split_line = line.split()
         print(line)
         if split_line[0] == "Sensor:":
-            mote_id = int(split_line[1])
-            timestamp = int(split_line[2])
-            temperature = float(split_line[3])
-            humidity = float(split_line[4])
-
-            print("ID: " + split_line[1] + "\tTimestamp: " + split_line[2] +
-                  "\tTemperature: " + split_line[3] + "\tHumidity: " + split_line[4])
+            try:
+                mote_id = int(split_line[1])
+                temperature = float(split_line[2])
+                humidity = float(split_line[3])
+            except ValueError:
+                print("Error")
+            else:
+                print("ID: " + split_line[1] + "\tTemperature: " + split_line[2] + "\tHumidity: " + split_line[3])
 
             send_request(host, mote_id, timestamp, temperature, humidity)
 
 
-def send_request(host, mote_id, timestamp, temperature, humidity):
+async def send_request(host, mote_id, timestamp, temperature, humidity):
     response = requests.put(
         host + '/addMeasurement',
         headers={'Content-Type': 'application/json'},
@@ -51,4 +53,3 @@ def start():
 
 
 start()
-
