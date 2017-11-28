@@ -9,6 +9,7 @@ from configparser import SafeConfigParser
 serial_path = '/dev/ttyUSB0'
 host = 'http://localhost:3000'
 sandbox = False
+debug = False
 
 if len(sys.argv) > 1:
     serial_path = sys.argv[1]    
@@ -19,6 +20,7 @@ def read_config():
     global host 
     global sandbox 
     global serial_path
+    global debug
 
     config = SafeConfigParser()
 
@@ -26,6 +28,7 @@ def read_config():
     serial_path = config.get('REST API', 'serial_path', fallback = '/dev/ttyUSB0')
     host = config.get('REST API', 'host', fallback = 'http://localhost:3000')
     sandbox = config.getboolean('REST API', 'sandbox', fallback = False)
+    debug = config.getboolean('REST API', 'debug', fallback = False)
 
 
 def read():
@@ -41,7 +44,8 @@ def read():
                 mote_id = int(split_line[2])
                 temperature = float(split_line[3])
                 humidity = float(split_line[4])
-                print("Message ID: {}\tMote ID: {}\tTemperature: {}\tHumidity: {}".format(msg_id, mote_id, temperature, humidity))
+                if debug:
+                    print("Message ID: {}\tMote ID: {}\tTemperature: {}\tHumidity: {}".format(msg_id, mote_id, temperature, humidity))
 
                 if not sandbox:
                     send_request(host, timestamp, mote_id, temperature, humidity)
