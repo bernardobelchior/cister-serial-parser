@@ -1,4 +1,5 @@
 import serial
+import logging
 import asyncio
 import requests
 import json
@@ -70,11 +71,12 @@ def send_request(host, timestamp, mote_id, temperature, humidity):
 
 def start():
     read_config()
+    logging.basicConfig(filename="log.log", level=logging.DEBUG)
     while True:
         try:
             read()
-        except:
-            pass
+        except Exception as e:
+            logging.exception(e)
 
 
 start()
